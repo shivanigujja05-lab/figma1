@@ -24,6 +24,30 @@ const scheduleItems = [
   { time: '03:00 PM', candidate: 'Aditi Varma', role: 'Finance Lead' },
 ]
 
+const offerTemplates = [
+  {
+    title: 'Standard Offer Letter',
+    description: 'A clean, professional letter for full-time hires.',
+    tags: ['Full-time', 'Clear terms', 'Balanced tone'],
+    preview: `Dear {{candidateName}},\n\nWe are pleased to offer you the position of {{jobTitle}} at {{companyName}}. Your start date will be {{startDate}}, and you will report to {{managerName}}.\n\nSalary: {{salary}} per annum\nBenefits: Health insurance, paid time off, and performance bonus.\n\nPlease sign and return this letter by {{deadline}}.\n\nSincerely,\n{{hrName}}`,
+    accent: 'from-sky-500 to-cyan-400',
+  },
+  {
+    title: 'Executive Offer Letter',
+    description: 'A premium offer for leadership roles with executive-level formatting.',
+    tags: ['Executive', 'Senior hire', 'High impact'],
+    preview: `Dear {{candidateName}},\n\nWe are delighted to extend an executive offer for the position of {{jobTitle}} at {{companyName}}. Your leadership will be instrumental in driving strategic growth.\n\nBase compensation: {{salary}} per annum\nEquity: {{equityPackage}}\nAdditional perks: Executive coaching, travel allowance, and premium insurance.\n\nPlease review and confirm by {{deadline}}.\n\nWarm regards,\n{{ceoName}}`,
+    accent: 'from-emerald-400 to-teal-400',
+  },
+  {
+    title: 'Internship Offer Letter',
+    description: 'A friendly and approachable template tailored for interns.',
+    tags: ['Intern', 'Flexible terms', 'Mentorship'],
+    preview: `Hi {{candidateName}},\n\nWe are excited to offer you an internship position as {{jobTitle}} at {{companyName}}. Your internship will begin on {{startDate}} and run through {{endDate}}.\n\nStipend: {{stipend}}\nMentor: {{mentorName}}\nSchedule: {{weeklyHours}} per week\n\nWelcome aboard — we look forward to helping you grow.\n\nBest,\n{{hrName}}`,
+    accent: 'from-violet-500 to-fuchsia-500',
+  },
+]
+
 const chartPoints = [80, 95, 90, 118, 105, 136, 128]
 const statusSegments = [
   { label: 'Draft', value: 22, color: 'from-slate-500 to-slate-400' },
@@ -53,6 +77,11 @@ function App() {
   })
   const [mobilePreview, setMobilePreview] = useState(false)
   const [offerCreated, setOfferCreated] = useState(false)
+  const [selectedTemplateIndex, setSelectedTemplateIndex] = useState(0)
+  const [templateUsed, setTemplateUsed] = useState<string | null>(null)
+  const [templates, setTemplates] = useState(offerTemplates)
+  const [isEditingTemplate, setIsEditingTemplate] = useState(false)
+  const [templateDraft, setTemplateDraft] = useState(offerTemplates[0].preview)
 
   useEffect(() => {
     localStorage.setItem('olmsLoggedIn', loggedIn ? 'true' : 'false')
@@ -421,11 +450,145 @@ function App() {
                   ))}
                 </div>
               </motion.div>
+            </section>
+
+            <section className="grid gap-5 xl:grid-cols-[1.35fr_0.65fr]">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.3 }}
+                className="rounded-[28px] border border-white/10 bg-slate-950/90 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.18)]"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Templates</p>
+                    <h3 className="mt-2 text-xl font-semibold text-white">Offer letter templates</h3>
+                  </div>
+                  <span className="rounded-3xl bg-slate-800/80 px-4 py-2 text-sm text-slate-300">Designed for HR</span>
+                </div>
+
+                <div className="mt-6 grid gap-4 lg:grid-cols-3">
+                  {templates.map((template, index) => (
+                    <button
+                      key={template.title}
+                      type="button"
+                      onClick={() => {
+                        setSelectedTemplateIndex(index)
+                        setTemplateDraft(template.preview)
+                        setTemplateUsed(null)
+                        setIsEditingTemplate(false)
+                      }}
+                      className={`group rounded-[28px] border p-5 text-left transition duration-200 ${
+                        selectedTemplateIndex === index
+                          ? 'border-sky-400/40 bg-slate-900/90 shadow-[0_25px_60px_rgba(56,189,248,0.16)]'
+                          : 'border-white/10 bg-slate-950/80 hover:border-sky-400/20 hover:bg-slate-900/80'
+                      }`}
+                    >
+                      <div className={`inline-flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br ${template.accent} text-white shadow-lg shadow-slate-900/30`}>
+                        <span className="text-lg font-bold">{template.title.charAt(0)}</span>
+                      </div>
+                      <h4 className="mt-5 text-base font-semibold text-white">{template.title}</h4>
+                      <p className="mt-2 text-sm leading-6 text-slate-400">{template.description}</p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {template.tags.map((tag) => (
+                          <span key={tag} className="rounded-full bg-slate-900/80 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-400">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.25 }}
+                transition={{ duration: 0.7, delay: 0.35 }}
+                className="rounded-[28px] border border-white/10 bg-slate-950/90 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.18)]"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Preview</p>
+                    <h3 className="mt-2 text-xl font-semibold text-white">Selected template</h3>
+                  </div>
+                  <span className="rounded-3xl bg-slate-800/80 px-4 py-2 text-sm text-slate-300">UX-ready</span>
+                </div>
+                <div className="mt-6 rounded-[28px] border border-white/10 bg-slate-900/80 p-5 text-sm leading-7 text-slate-300 shadow-inner">
+                  {isEditingTemplate ? (
+                    <div className="space-y-4">
+                      <textarea
+                        value={templateDraft}
+                        onChange={(event) => setTemplateDraft(event.target.value)}
+                        className="h-64 w-full rounded-3xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-slate-100 outline-none ring-1 ring-transparent transition focus:border-sky-400/30 focus:ring-2 focus:ring-sky-500/20"
+                      />
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTemplates((current) =>
+                              current.map((template, index) =>
+                                index === selectedTemplateIndex ? { ...template, preview: templateDraft } : template,
+                              ),
+                            )
+                            setIsEditingTemplate(false)
+                          }}
+                          className="rounded-3xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
+                        >
+                          Save changes
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTemplateDraft(templates[selectedTemplateIndex].preview)
+                            setIsEditingTemplate(false)
+                          }}
+                          className="rounded-3xl border border-white/10 bg-slate-900/80 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:bg-slate-800"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <pre className="whitespace-pre-wrap break-words font-sans text-sm text-slate-200">
+{templates[selectedTemplateIndex].preview}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-6 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingTemplate(true)}
+                    className="inline-flex items-center justify-center rounded-3xl border border-white/10 bg-slate-900/80 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:bg-slate-800"
+                  >
+                    Edit template
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOfferCreated(true)
+                      setTemplateUsed(templates[selectedTemplateIndex].title)
+                    }}
+                    className="inline-flex items-center justify-center rounded-3xl bg-gradient-to-r from-sky-500 to-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:-translate-y-0.5"
+                  >
+                    Use this template
+                  </button>
+                </div>
+                {templateUsed && (
+                  <p className="mt-4 text-sm font-medium text-emerald-300">
+                    {templateUsed} selected and ready to use.
+                  </p>
+                )}
+              </motion.div>
+            </section>
+
+            <section className="grid gap-5 xl:grid-cols-[1.3fr_0.7fr]">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
                 className="rounded-[28px] border border-white/10 bg-slate-950/90 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.18)]"
               >
                 <div className="flex items-center justify-between gap-4">
